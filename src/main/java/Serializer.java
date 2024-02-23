@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
@@ -11,13 +12,32 @@ public class Serializer {
      * @return
      */
     public static String serialize(Object obj) {
-        try {
-            Field field = obj.getClass().getDeclaredField("value");
-            return "{" + field.getName() + "='" + field.get(obj).toString() + "'}";
+        StringBuilder stringBuilder = new StringBuilder("{");
 
+        try {
+            int count = 0;
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(Ignored.class))
+                    continue;
+
+                if (count > 0) {
+                    stringBuilder.append(',');
+                }
+
+                field.setAccessible(true);
+
+                stringBuilder.append(field.getName());
+                stringBuilder.append(':');
+                Object fieldValue = field.get(obj);
+
+                System.out.println(fieldValue.getClass().getName() + ": " + fieldValue.getClass().isArray());
+                stringBuilder.append(fieldValue.toString());
+                count++;
+            }
         } catch (Exception ignored) { }
 
-        return null;
+        stringBuilder.append("}");
+        return stringBuilder.toString();
     }
 
     /**
@@ -28,9 +48,6 @@ public class Serializer {
      */
     public static <T> T deserialize(Class<T> c, String s) {
         try {
-            for (Constructor<?> cto : c.getDeclaredConstructors())
-                System.out.println(cto.getName());
-
             Constructor<T> ctor = c.getDeclaredConstructor();
             T newObject = ctor.newInstance();
             return newObject;
