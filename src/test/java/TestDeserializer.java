@@ -12,7 +12,7 @@ public class TestDeserializer {
      */
     @Test
     public void testDeserialize() {
-        TestClassOne t = Deserializer.deserialize(TestClassOne.class, "{value='Handle'}");
+        TestClass t = Deserializer.deserialize(TestClass.class, "{value='Handle'}");
         assertNotNull(t);
         assertEquals("string_value", t.str);
     }

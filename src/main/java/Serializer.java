@@ -40,9 +40,7 @@ public class Serializer {
                 stringBuilder.append(",");
             }
 
-            field.setAccessible(true);
             serializeField(field, obj, stringBuilder);
-
             count++;
         }
 
@@ -56,17 +54,29 @@ public class Serializer {
      * @throws IllegalAccessException
      */
     public static void serializeField(Field field, Object owner, StringBuilder stringBuilder) throws IllegalAccessException {
+        field.setAccessible(true);
         stringBuilder.append(field.getName());
         stringBuilder.append(":");
-        Object fieldValue = field.get(owner);
+        serializeValue(field.get(owner), stringBuilder);
+    }
 
-        if (fieldValue.getClass().isArray()) {
-            serializeArray(fieldValue, stringBuilder);
-        } else if (PrimitiveUtil.isPrimitiveType(fieldValue)) {
-            stringBuilder.append(PrimitiveUtil.convertToString(fieldValue));
-        } else {
-            serializeObject(fieldValue, stringBuilder);
+    /**
+     * @param value
+     * @param stringBuilder
+     * @throws IllegalAccessException
+     */
+    public static void serializeValue(Object value, StringBuilder stringBuilder) throws IllegalAccessException {
+        if (value.getClass().isArray()) {
+            serializeArray(value, stringBuilder);
+            return;
         }
+
+        if (PrimitiveUtil.isPrimitiveType(value)) {
+            stringBuilder.append(PrimitiveUtil.convertToString(value));
+            return;
+        }
+
+        serializeObject(value, stringBuilder);
     }
 
     /**
