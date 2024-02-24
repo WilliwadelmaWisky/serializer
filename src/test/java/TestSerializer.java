@@ -50,23 +50,7 @@ public class TestSerializer {
      *
      */
     @Test
-    public void testSerializeValue() throws IllegalAccessException {
-        StringBuilder stringBuilder = new StringBuilder();
-        int value1 = 100;
-        Serializer.serializeValue(value1, stringBuilder);
-        assertEquals("100", stringBuilder.toString());
-
-        stringBuilder.setLength(0);
-        boolean[] value2 = new boolean[] { true, false };
-        Serializer.serializeValue(value2, stringBuilder);
-        assertEquals("[true,false]", stringBuilder.toString());
-    }
-
-    /**
-     *
-     */
-    @Test
-    public void testSerializeArray() {
+    public void testSerializeArray() throws IllegalAccessException {
         StringBuilder stringBuilder = new StringBuilder();
         float[] array1 = new float[] { 1.0f, 2.3f, 1.2f };
         Serializer.serializeArray(array1, stringBuilder);
@@ -76,5 +60,16 @@ public class TestSerializer {
         char[] array2 = new char[] { 'm', '1', '_' };
         Serializer.serializeArray(array2, stringBuilder);
         assertEquals("[m,1,_]", stringBuilder.toString());
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testSerializeValue() throws IllegalAccessException {
+        StringBuilder stringBuilder = new StringBuilder();
+        int value1 = 100;
+        Serializer.serializeValue(value1, stringBuilder);
+        assertEquals("100", stringBuilder.toString());
     }
 }

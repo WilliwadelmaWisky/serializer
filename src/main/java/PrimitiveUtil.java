@@ -19,9 +19,13 @@ public abstract class PrimitiveUtil {
      * @param obj
      * @return
      */
-    public static boolean isPrimitiveType(Object obj) {
-        return PRIMITIVE_TYPE_SET.contains(obj.getClass());
-    }
+    public static boolean isPrimitiveType(Object obj) { return isPrimitiveType(obj.getClass()); }
+
+    /**
+     * @param objClass
+     * @return
+     */
+    public static boolean isPrimitiveType(Class<?> objClass) { return PRIMITIVE_TYPE_SET.contains(objClass); }
 
 
     public static String convertToString(Object obj) {

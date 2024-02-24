@@ -57,33 +57,21 @@ public class Serializer {
         field.setAccessible(true);
         stringBuilder.append(field.getName());
         stringBuilder.append(":");
-        serializeValue(field.get(owner), stringBuilder);
-    }
+        Object value = field.get(owner);
 
-    /**
-     * @param value
-     * @param stringBuilder
-     * @throws IllegalAccessException
-     */
-    public static void serializeValue(Object value, StringBuilder stringBuilder) throws IllegalAccessException {
         if (value.getClass().isArray()) {
             serializeArray(value, stringBuilder);
             return;
         }
 
-        if (PrimitiveUtil.isPrimitiveType(value)) {
-            stringBuilder.append(PrimitiveUtil.convertToString(value));
-            return;
-        }
-
-        serializeObject(value, stringBuilder);
+        serializeValue(value, stringBuilder);
     }
 
     /**
      * @param array
      * @param stringBuilder
      */
-    public static void serializeArray(Object array, StringBuilder stringBuilder) {
+    public static void serializeArray(Object array, StringBuilder stringBuilder) throws IllegalAccessException {
         stringBuilder.append("[");
 
         int count = 0;
@@ -93,10 +81,27 @@ public class Serializer {
             }
 
             Object element = Array.get(array, i);
-            stringBuilder.append(element.toString());
+            serializeValue(element, stringBuilder);
             count++;
         }
 
         stringBuilder.append("]");
+    }
+
+    public static void serializeValue(Object value, StringBuilder stringBuilder) throws IllegalAccessException {
+        if (PrimitiveUtil.isPrimitiveType(value)) {
+            serializePrimitiveValue(value, stringBuilder);
+            return;
+        }
+
+        serializeObject(value, stringBuilder);
+    }
+
+    /**
+     * @param value
+     * @param stringBuilder
+     */
+    public static void serializePrimitiveValue(Object value, StringBuilder stringBuilder) {
+        stringBuilder.append(PrimitiveUtil.convertToString(value));
     }
 }
