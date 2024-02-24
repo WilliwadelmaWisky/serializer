@@ -1,5 +1,4 @@
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 /**
@@ -12,48 +11,82 @@ public class Serializer {
      * @return
      */
     public static String serialize(Object obj) {
-        StringBuilder stringBuilder = new StringBuilder("{");
+        StringBuilder stringBuilder = new StringBuilder();
 
         try {
-            int count = 0;
-            for (Field field : obj.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(Ignored.class))
-                    continue;
+            serializeObject(obj, stringBuilder);
+        } catch (IllegalAccessException illegalAccessException) {
+            throw new RuntimeException(illegalAccessException);
+        }
 
-                if (count > 0) {
-                    stringBuilder.append(',');
-                }
-
-                field.setAccessible(true);
-
-                stringBuilder.append(field.getName());
-                stringBuilder.append(':');
-                Object fieldValue = field.get(obj);
-
-                System.out.println(fieldValue.getClass().getName() + ": " + fieldValue.getClass().isArray());
-                stringBuilder.append(fieldValue.toString());
-                count++;
-            }
-        } catch (Exception ignored) { }
-
-        stringBuilder.append("}");
         return stringBuilder.toString();
     }
 
+
     /**
-     * @param c
-     * @param s
-     * @param <T>
-     * @return
+     * @param obj
+     * @param stringBuilder
+     * @throws IllegalAccessException
      */
-    public static <T> T deserialize(Class<T> c, String s) {
-        try {
-            Constructor<T> ctor = c.getDeclaredConstructor();
-            T newObject = ctor.newInstance();
-            return newObject;
+    public static void serializeObject(Object obj, StringBuilder stringBuilder) throws IllegalAccessException {
+        stringBuilder.append("{");
 
-        } catch (Exception ignored) { }
+        int count = 0;
+        for (Field field : obj.getClass().getDeclaredFields()) {
+            if (Util.isFieldIgnored(field))
+                continue;
 
-        return null;
+            if (count > 0) {
+                stringBuilder.append(",");
+            }
+
+            field.setAccessible(true);
+            serializeField(field, obj, stringBuilder);
+
+            count++;
+        }
+
+        stringBuilder.append("}");
+    }
+
+    /**
+     * @param field
+     * @param owner
+     * @param stringBuilder
+     * @throws IllegalAccessException
+     */
+    public static void serializeField(Field field, Object owner, StringBuilder stringBuilder) throws IllegalAccessException {
+        stringBuilder.append(field.getName());
+        stringBuilder.append(":");
+        Object fieldValue = field.get(owner);
+
+        if (fieldValue.getClass().isArray()) {
+            serializeArray(fieldValue, stringBuilder);
+        } else if (PrimitiveUtil.isPrimitiveType(fieldValue)) {
+            stringBuilder.append(PrimitiveUtil.convertToString(fieldValue));
+        } else {
+            serializeObject(fieldValue, stringBuilder);
+        }
+    }
+
+    /**
+     * @param array
+     * @param stringBuilder
+     */
+    public static void serializeArray(Object array, StringBuilder stringBuilder) {
+        stringBuilder.append("[");
+
+        int count = 0;
+        for (int i = 0; i < Array.getLength(array); i++) {
+            if (count > 0) {
+                stringBuilder.append(",");
+            }
+
+            Object element = Array.get(array, i);
+            stringBuilder.append(element.toString());
+            count++;
+        }
+
+        stringBuilder.append("]");
     }
 }
