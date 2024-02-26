@@ -12,16 +12,13 @@ public class Deserializer {
     /**
      * @param objClass
      * @param s
+     * @param formatter
      * @param <T>
      * @return
      */
-    public static <T> T deserialize(Class<T> objClass, String s) {
-        try {
-            StringBuilder stringBuilder = new StringBuilder(s);
-            return deserializeObject(objClass, stringBuilder);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public static <T> T deserialize(Class<T> objClass, String s, Formatter formatter) {
+        Metadata metadata = formatter.convert(s);
+        return createObject(objClass, metadata);
     }
 
 
@@ -29,10 +26,17 @@ public class Deserializer {
         Constructor<T> ctor = objClass.getDeclaredConstructor();
         T obj = ctor.newInstance();
 
+        for (Field field : obj.getClass().getDeclaredFields()) {
+            if (Util.isFieldIgnored(field))
+                continue;
+
+            deserializeField(field, obj, stringBuilder);
+        }
+
         return obj;
     }
 
-    public static void deserializeField(Field field, Object obj, String s) {
+    public static void deserializeField(Field field, Object obj, StringBuilder stringBuilder) {
 
     }
 
@@ -59,5 +63,33 @@ public class Deserializer {
         }
 
         return stringBuilder.toString();
+    }
+
+
+    public static <T> T createObject(Class<T> objClass, Metadata metadata) {
+        try {
+            Constructor<T> ctor = objClass.getDeclaredConstructor();
+            T obj = ctor.newInstance();
+
+            for (Field field : objClass.getDeclaredFields()) {
+                if (Util.isFieldIgnored(field))
+                    continue;
+
+                Metadata fieldData = metadata.getField(field.getName());
+                if (field.getType().isArray()) {
+                    continue;
+                }
+
+                if (PrimitiveUtil.isPrimitiveType(field.getType())) {
+                    continue;
+                }
+
+                Object value = createObject(field.getType(), fieldData);
+                field.set(obj, value);
+            }
+
+        } catch (Exception ignored) { }
+
+        return null;
     }
 }

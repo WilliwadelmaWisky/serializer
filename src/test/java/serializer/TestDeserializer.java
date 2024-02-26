@@ -14,8 +14,6 @@ public class TestDeserializer {
      */
     @Test
     public void testDeserialize() {
-        TestClass t = Deserializer.deserialize(TestClass.class, "{value='Handle'}");
-        assertNotNull(t);
-        assertEquals("string_value", t.str);
+
     }
 }

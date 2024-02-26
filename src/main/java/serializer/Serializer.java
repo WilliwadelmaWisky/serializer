@@ -106,4 +106,15 @@ public class Serializer {
     public static void serializePrimitiveValue(Object value, StringBuilder stringBuilder) {
         stringBuilder.append(PrimitiveUtil.convertToString(value));
     }
+
+
+    /**
+     * @param obj
+     * @return
+     */
+    public static Metadata createMetadata(Object obj) {
+        Class<?> objClass = obj.getClass();
+        Metadata metadata = new Metadata(objClass.getName());
+        return metadata;
+    }
 }
