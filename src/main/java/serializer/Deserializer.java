@@ -1,8 +1,14 @@
 package serializer;
 
+import serializer.format.Formatter;
+import serializer.meta.ArrayMetadata;
+import serializer.meta.Metadata;
+import serializer.meta.ObjectMetadata;
+import serializer.meta.ValueMetadata;
+
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  *
@@ -18,78 +24,68 @@ public class Deserializer {
      */
     public static <T> T deserialize(Class<T> objClass, String s, Formatter formatter) {
         Metadata metadata = formatter.convert(s);
-        return createObject(objClass, metadata);
+        return createObject(objClass, (ObjectMetadata)metadata);
     }
 
 
-    public static <T> T deserializeObject(Class<T> objClass, StringBuilder stringBuilder) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Constructor<T> ctor = objClass.getDeclaredConstructor();
-        T obj = ctor.newInstance();
-
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            if (Util.isFieldIgnored(field))
-                continue;
-
-            deserializeField(field, obj, stringBuilder);
-        }
-
-        return obj;
-    }
-
-    public static void deserializeField(Field field, Object obj, StringBuilder stringBuilder) {
-
-    }
-
-
-    public static void deserializeArray(Class<?> arrayClass, StringBuilder s) {
-
-    }
-
-    public static Object deserializeValue(Class<?> valueType, StringBuilder stringBuilder) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        if (PrimitiveUtil.isPrimitiveType(valueType)) {
-            return deserializePrimitiveValue(valueType, stringBuilder);
-        }
-
-        return deserializeObject(valueType, stringBuilder);
-    }
-
-    public static Object deserializePrimitiveValue(Class<?> valueType, StringBuilder stringBuilder) {
-        if (valueType.equals(Integer.class)) {
-            return Integer.parseInt(stringBuilder.toString());
-        }
-
-        if (valueType.equals(Long.class)) {
-            return Long.parseLong(stringBuilder.toString());
-        }
-
-        return stringBuilder.toString();
-    }
-
-
-    public static <T> T createObject(Class<T> objClass, Metadata metadata) {
+    public static <T> T createObject(Class<T> objType, ObjectMetadata metadata) {
         try {
-            Constructor<T> ctor = objClass.getDeclaredConstructor();
+            Constructor<T> ctor = objType.getDeclaredConstructor();
             T obj = ctor.newInstance();
 
-            for (Field field : objClass.getDeclaredFields()) {
+            for (Field field : objType.getDeclaredFields()) {
                 if (Util.isFieldIgnored(field))
                     continue;
 
                 Metadata fieldData = metadata.getField(field.getName());
                 if (field.getType().isArray()) {
+                    field.set(obj, createArray(field.getClass().getComponentType(), (ArrayMetadata)fieldData));
                     continue;
                 }
 
                 if (PrimitiveUtil.isPrimitiveType(field.getType())) {
+                    field.set(obj, createValue(field.getType(), (ValueMetadata)fieldData));
                     continue;
                 }
 
-                Object value = createObject(field.getType(), fieldData);
-                field.set(obj, value);
+                field.set(obj, createObject(field.getType(), (ObjectMetadata)fieldData));
             }
 
+            return obj;
         } catch (Exception ignored) { }
 
         return null;
+    }
+
+    public static Object createArray(Class<?> componentType, ArrayMetadata metadata) {
+        Object array = Array.newInstance(componentType, metadata.getLength());
+        int index = 0;
+
+        for (Metadata data : metadata.getValues()) {
+
+            Object value;
+            if (PrimitiveUtil.isPrimitiveType(componentType)) {
+                value = createValue(componentType, (ValueMetadata)data);
+            } else {
+                value = createObject(componentType, (ObjectMetadata)data);
+            }
+
+            Array.set(array, index, value);
+            index++;
+        }
+
+        return array;
+    }
+
+    public static Object createValue(Class<?> valueType, ValueMetadata metadata) {
+        if (valueType.equals(Integer.class)) {
+            return Integer.parseInt(metadata.getValue());
+        }
+
+        if (valueType.equals(Long.class)) {
+            return Long.parseLong(metadata.getValue());
+        }
+
+        return metadata.getValue();
     }
 }

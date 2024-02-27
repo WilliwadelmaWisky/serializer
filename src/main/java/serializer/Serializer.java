@@ -1,5 +1,8 @@
 package serializer;
 
+import serializer.meta.Metadata;
+import serializer.meta.ObjectMetadata;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
@@ -114,7 +117,7 @@ public class Serializer {
      */
     public static Metadata createMetadata(Object obj) {
         Class<?> objClass = obj.getClass();
-        Metadata metadata = new Metadata(objClass.getName());
+        Metadata metadata = new ObjectMetadata(objClass.getName());
         return metadata;
     }
 }

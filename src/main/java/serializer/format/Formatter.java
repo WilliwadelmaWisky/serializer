@@ -1,4 +1,6 @@
-package serializer;
+package serializer.format;
+
+import serializer.meta.Metadata;
 
 /**
  *

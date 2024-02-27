@@ -1,4 +1,4 @@
-package serializer.json;
+package serializer.format.json;
 
 import serializer.Serializer;
 
