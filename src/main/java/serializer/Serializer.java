@@ -1,5 +1,6 @@
 package serializer;
 
+import serializer.format.Formatter;
 import serializer.meta.Metadata;
 import serializer.meta.ObjectMetadata;
 
@@ -25,6 +26,17 @@ public class Serializer {
         }
 
         return stringBuilder.toString();
+    }
+
+
+    public String serialize(Object obj, Formatter formatter) {
+        Metadata metadata = new ObjectMetadata(obj);
+        return formatter.convert(metadata);
+    }
+
+    public <T> T deserialize(Class<T> objType, String s, Formatter formatter) {
+        Metadata metadata = formatter.convert(s);
+        return metadata.construct(objType);
     }
 
 

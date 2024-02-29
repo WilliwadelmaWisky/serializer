@@ -21,6 +21,11 @@ public class ObjectMetadata implements Metadata {
     }
 
 
+    public ObjectMetadata(Object obj) {
+
+    }
+
+
     @Override
     public String getName() { return _name; }
 
