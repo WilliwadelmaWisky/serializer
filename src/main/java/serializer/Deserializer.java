@@ -4,7 +4,6 @@ import serializer.format.Formatter;
 import serializer.meta.ArrayMetadata;
 import serializer.meta.Metadata;
 import serializer.meta.ObjectMetadata;
-import serializer.meta.ValueMetadata;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;

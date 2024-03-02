@@ -29,11 +29,24 @@ public class Serializer {
     }
 
 
+    /**
+     * @param obj
+     * @param formatter
+     * @return
+     */
     public String serialize(Object obj, Formatter formatter) {
-        Metadata metadata = new ObjectMetadata(obj);
+        Class<?> objClass = obj.getClass();
+        Metadata metadata = new ObjectMetadata(objClass.getName(), obj);
         return formatter.convert(metadata);
     }
 
+    /**
+     * @param objType
+     * @param s
+     * @param formatter
+     * @param <T>
+     * @return
+     */
     public <T> T deserialize(Class<T> objType, String s, Formatter formatter) {
         Metadata metadata = formatter.convert(s);
         return metadata.construct(objType);
@@ -120,16 +133,5 @@ public class Serializer {
      */
     public static void serializePrimitiveValue(Object value, StringBuilder stringBuilder) {
         stringBuilder.append(PrimitiveUtil.convertToString(value));
-    }
-
-
-    /**
-     * @param obj
-     * @return
-     */
-    public static Metadata createMetadata(Object obj) {
-        Class<?> objClass = obj.getClass();
-        Metadata metadata = new ObjectMetadata(objClass.getName());
-        return metadata;
     }
 }

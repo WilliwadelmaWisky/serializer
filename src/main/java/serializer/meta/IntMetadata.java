@@ -3,7 +3,7 @@ package serializer.meta;
 /**
  *
  */
-public class BooleanMetadata implements Metadata {
+public class IntMetadata implements Metadata {
 
     private final String _name;
     private final String _value;
@@ -13,7 +13,7 @@ public class BooleanMetadata implements Metadata {
      * @param name
      * @param value
      */
-    public BooleanMetadata(String name, Boolean value) {
+    public IntMetadata(String name, Integer value) {
         _name = name;
         _value = value.toString();
     }
@@ -27,7 +27,6 @@ public class BooleanMetadata implements Metadata {
         return _name;
     }
 
-
     /**
      * @param objType
      * @param <T>
@@ -35,9 +34,9 @@ public class BooleanMetadata implements Metadata {
      */
     @Override
     public <T> T construct(Class<T> objType) {
-        if (objType != Boolean.class)
+        if (objType == Integer.class)
             return null;
 
-        return objType.cast(Boolean.valueOf(_value));
+        return objType.cast(Integer.valueOf(_value));
     }
 }
