@@ -1,8 +1,10 @@
 # Serializer
-A custom object serializer for java projects.
+A custom object serialization library for java projects.
+
+Work in Progress
 
 ## Dependencies
-- JUnit5
+- JUnit5 (Testing)
 
 ## Installation
 Not ready to be used.
